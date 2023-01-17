@@ -19,13 +19,25 @@ async function run(){
 try{
     await client.connect();
    const shopsCollection = client.db('ezectric_electrical').collection('shops');
+   const bookingCollection = client.db('ezectric_electrical').collection('bookings');
 
+   //product data api
    app.get('/shops',async(req,res) =>{
     const query ={};
     const cursor = shopsCollection.find(query);
     const  shops = await cursor.toArray();
     res.send(shops);
    })
+  //product data end
+
+//bookings orders
+app.post('/booking',async(req,res) =>{
+  const booking = req.body;
+  const result = await bookingCollection.insertOne(booking);
+  res.send(result);
+})
+
+
 }
 finally{
 
