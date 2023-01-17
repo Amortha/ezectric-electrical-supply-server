@@ -30,6 +30,17 @@ try{
    })
   //product data end
 
+// order get dashboard
+
+app.get('/booking',async(req,res) =>{
+const customerEmail= req.query.customerEmail;
+const query = {customerEmail : customerEmail};
+const bookings =await bookingCollection.find(query).toArray();
+res.send(bookings)
+})
+
+// order get dashboard end
+
 //bookings orders
 app.post('/booking',async(req,res) =>{
   const booking = req.body;
