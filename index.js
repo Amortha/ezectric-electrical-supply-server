@@ -50,30 +50,54 @@ async function run() {
       res.send(shops);
     })
     //product data end
+    //Add new Product data start
 
-// All UserEmail start
-app.get('/user', verifyJWT, async(req,res) => {
-  const users = await userCollection.find().toArray();
-  res.send(users);
-})
+    app.post('/shops', async (req, res) => {
+      const newShops = req.body;
+      const result = await shopsCollection.insertOne(newShops)
+      res.send(result);
+    })
+    //Add new Product data end
+    // All UserEmail start
+    app.get('/user', verifyJWT, async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
+    })
 
-// All UserEmail end
+    // All UserEmail end
+
+    app.get('/admin/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = await userCollection.findOne({ email: email });
+      const isAdmin = user.role === 'admin';
+      res.send({ admin: isAdmin })
+    })
 
 
-//Make a Admin start
+    //Make a Admin start
 
-app.put('/user/admin/:email',verifyJWT, async (req, res) => {
-  const email = req.params.email;
-  const filter = { email: email };
-  const updateDoc = {
-    $set:{role:'admin'} ,
-  };
-  const result = await userCollection.updateOne(filter, updateDoc);
-  
-  res.send(result );
-})
+    app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const requester = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({ email: requester });
+      if (requesterAccount.role === 'admin') {
 
-//Make a Admin end
+        const filter = { email: email };
+        const updateDoc = {
+          $set: { role: 'admin' },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc);
+
+        res.send(result);
+
+      }
+      else {
+        res.status(403).send({ message: 'forbidden' });
+      }
+
+    })
+
+    //Make a Admin end
     //login user Email get
     app.put('/user/:email', async (req, res) => {
       const email = req.params.email;
@@ -93,16 +117,16 @@ app.put('/user/admin/:email',verifyJWT, async (req, res) => {
 
     // order get dashboard
 
-    app.get('/booking',verifyJWT, async (req, res) => {
+    app.get('/booking', verifyJWT, async (req, res) => {
       const customerEmail = req.query.customerEmail;
-     const decodedEmaill =req.query.customerEmail;
-     if(customerEmail === decodedEmaill){
-      const query = { customerEmail: customerEmail };
-      const bookings = await bookingCollection.find(query).toArray();
-      return res.send(bookings);
-     }
-      else{
-        return res.status(403).send({message:'forbidden access'});
+      const decodedEmaill = req.query.customerEmail;
+      if (customerEmail === decodedEmaill) {
+        const query = { customerEmail: customerEmail };
+        const bookings = await bookingCollection.find(query).toArray();
+        return res.send(bookings);
+      }
+      else {
+        return res.status(403).send({ message: 'forbidden access' });
 
       }
     })
