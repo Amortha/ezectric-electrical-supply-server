@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const e = require('express');
 
 
@@ -129,7 +129,8 @@ async function run() {
         return res.status(403).send({ message: 'forbidden access' });
 
       }
-    })
+    });
+   
 
     // app.get('/booking',verifyJWT, async (req, res) => {
     //   const customerEmail = req.query.customerEmail
@@ -142,6 +143,17 @@ async function run() {
 
     // order get dashboard end
 
+    // payment data start
+
+    app.get('/booking/:id',verifyJWT,async(req,res)=>{
+      const id =req.params.id;
+      const query = {_id:ObjectId(id)};
+      const booking = await bookingCollection.findOne(query);
+      res.send(booking)
+      
+    })
+    // payment data end
+    
     //bookings orders
     app.post('/booking', async (req, res) => {
       const booking = req.body;
