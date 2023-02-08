@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const e = require('express');
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express()
 const port = process.env.PORT || 5000
@@ -41,6 +41,21 @@ async function run() {
     const shopsCollection = client.db('ezectric_electrical').collection('shops');
     const bookingCollection = client.db('ezectric_electrical').collection('bookings');
     const userCollection = client.db('ezectric_electrical').collection('users');
+
+
+    //payment method start
+    app.post('/cerate-payment-intent', verifyJWT, async (req, res) => {
+      const shop = req.body;
+      const price = shop.price;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount:amount,
+        currency:'usd',
+        payment_method_types:['card']
+      });
+      res.send({clientSecret:paymentIntent.client_secret})
+    });
+    //payment method end
 
     //product data api
     app.get('/shops', async (req, res) => {
@@ -130,7 +145,7 @@ async function run() {
 
       }
     });
-   
+
 
     // app.get('/booking',verifyJWT, async (req, res) => {
     //   const customerEmail = req.query.customerEmail
@@ -145,15 +160,15 @@ async function run() {
 
     // payment data start
 
-    app.get('/booking/:id',verifyJWT,async(req,res)=>{
-      const id =req.params.id;
-      const query = {_id:ObjectId(id)};
+    app.get('/booking/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
       const booking = await bookingCollection.findOne(query);
       res.send(booking)
-      
+
     })
     // payment data end
-    
+
     //bookings orders
     app.post('/booking', async (req, res) => {
       const booking = req.body;
