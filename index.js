@@ -3,7 +3,6 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const e = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express()
@@ -47,7 +46,7 @@ async function run() {
     app.post('/cerate-payment-intent', verifyJWT, async (req, res) => {
       const shop = req.body;
       const price = shop.price;
-      const amount = price * 100;
+      const amount = price*100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount:amount,
         currency:'usd',
