@@ -40,19 +40,20 @@ async function run() {
     const shopsCollection = client.db('ezectric_electrical').collection('shops');
     const bookingCollection = client.db('ezectric_electrical').collection('bookings');
     const userCollection = client.db('ezectric_electrical').collection('users');
+    const paymentCollection = client.db('ezectric_electrical').collection('payments');
 
 
     //payment method start
     app.post('/cerate-payment-intent', verifyJWT, async (req, res) => {
       const shop = req.body;
       const price = shop.price;
-      const amount = price*100;
+      const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
-        amount:amount,
-        currency:'usd',
-        payment_method_types:['card']
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
       });
-      res.send({clientSecret:paymentIntent.client_secret})
+      res.send({ clientSecret: paymentIntent.client_secret })
     });
     //payment method end
 
@@ -97,7 +98,7 @@ async function run() {
       if (requesterAccount.role === 'admin') {
 
         const filter = { email: email };
-        const updateDoc = {
+        const updatedDoc = {
           $set: { role: 'admin' },
         };
         const result = await userCollection.updateOne(filter, updateDoc);
@@ -127,6 +128,25 @@ async function run() {
     })
 
     // login user Email get end
+
+    //payment data mathod start
+    app.patch('/booking/:id', verifyJWT, async (req, res) => {
+
+      const id = req.params.id;
+     const  payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId
+        }
+      }
+      const result = await paymentCollection.insertOne(payment);
+      const updateBooking = await bookingCollection.updateOne(filter,updatedDoc)
+      res.send(updatedDoc);
+    })
+
+    //payment data mathod end
 
 
     // order get dashboard
