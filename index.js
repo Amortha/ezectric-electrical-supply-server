@@ -84,6 +84,14 @@ async function run() {
     })
     //Add new Product data end
 
+    //add new customar review start
+    app.post('/reviews', async (req, res) => {
+      const newReview = req.body;
+      const result = await reviewsCollection.insertOne( newReview)
+      res.send(result);
+    })
+    //add new customar review end
+
     // All UserEmail start
     app.get('/user', verifyJWT, async (req, res) => {
       const users = await userCollection.find().toArray();
