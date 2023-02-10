@@ -38,6 +38,7 @@ async function run() {
     await client.connect();
     //browser collection name 
     const shopsCollection = client.db('ezectric_electrical').collection('shops');
+    const reviewsCollection = client.db('ezectric_electrical').collection('reviews');
     const bookingCollection = client.db('ezectric_electrical').collection('bookings');
     const userCollection = client.db('ezectric_electrical').collection('users');
     const paymentCollection = client.db('ezectric_electrical').collection('payments');
@@ -65,14 +66,24 @@ async function run() {
       res.send(shops);
     })
     //product data end
-    //Add new Product data start
 
+    //review data api start
+    app.get('/reviews', async (req, res) => {
+      const query = {};
+      const cursor = reviewsCollection.find(query);
+      const shops = await cursor.toArray();
+      res.send(shops);
+    })
+    // review data api end
+
+    //Add new Product data start
     app.post('/shops', async (req, res) => {
       const newShops = req.body;
       const result = await shopsCollection.insertOne(newShops)
       res.send(result);
     })
     //Add new Product data end
+
     // All UserEmail start
     app.get('/user', verifyJWT, async (req, res) => {
       const users = await userCollection.find().toArray();
