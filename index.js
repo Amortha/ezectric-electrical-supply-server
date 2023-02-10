@@ -133,7 +133,7 @@ async function run() {
     app.patch('/booking/:id', verifyJWT, async (req, res) => {
 
       const id = req.params.id;
-     const  payment = req.body;
+      const payment = req.body;
       const filter = { _id: ObjectId(id) };
       const updatedDoc = {
         $set: {
@@ -142,7 +142,7 @@ async function run() {
         }
       }
       const result = await paymentCollection.insertOne(payment);
-      const updateBooking = await bookingCollection.updateOne(filter,updatedDoc)
+      const updateBooking = await bookingCollection.updateOne(filter, updatedDoc)
       res.send(updatedDoc);
     })
 
@@ -197,6 +197,15 @@ async function run() {
 
     //booking order end
 
+
+    //Delete Manage Product start
+    app.delete('/shops/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await shopsCollection.deleteOne(query);
+      res.send(result)
+    })
+    //Delete Manage Product end
   }
   finally {
 
